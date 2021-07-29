@@ -1,32 +1,67 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
-  </div>
+  <v-app>
+    <v-app-bar app color="primary" dark>
+      <v-toolbar-title> Gallery </v-toolbar-title>
+
+      <v-spacer></v-spacer>
+
+      <v-toolbar-items>
+        <v-btn text @click="fill">Random Data</v-btn>
+      </v-toolbar-items>
+    </v-app-bar>
+
+    <v-main>
+      <v-container>
+        <v-row>
+          <v-col v-for="item in list" :key="item.id" lg="3">
+            <v-card>
+              <v-img :src="item.url" :aspect-ratio="4 / 3"></v-img>
+
+              <v-card-title>
+                {{ item.name }}
+              </v-card-title>
+
+              <v-card-subtitle>
+                <v-icon small>mdi-account</v-icon>
+                {{ item.user.name }}
+              </v-card-subtitle>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script lang="ts">
+import Vue from "vue";
+import { fetchPhotoList } from "./api/photos";
+import { loadRandomData } from "./api/random";
+import { fetchUserList } from "./api/user";
+import { Photo } from "./entity/Photo";
+import { User } from "./entity/User";
 
-#nav {
-  padding: 30px;
+export default Vue.extend({
+  data() {
+    return {
+      list: [] as Photo[],
+      users: [] as User[]
+    };
+  },
+  async mounted() {
+    this.fetch();
+  },
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
+  methods: {
+    async fetch() {
+      this.users = await fetchUserList();
+      this.list = await fetchPhotoList();
+    },
 
-    &.router-link-exact-active {
-      color: #42b983;
+    async fill() {
+      await loadRandomData();
+      await this.fetch();
     }
   }
-}
-</style>
+});
+</script>
